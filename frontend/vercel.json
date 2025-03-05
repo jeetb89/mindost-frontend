@@ -1,0 +1,7 @@
+{
+  "buildCommand": "CI=false next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next"
+} 
