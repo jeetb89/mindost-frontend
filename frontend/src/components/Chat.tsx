@@ -1,15 +1,10 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 import { MicrophoneIcon, XMarkIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { getChatResponse } from '@/services/openai';
 import { useRouter } from 'next/navigation';
-
-// Dynamically import ConfirmDialog with no SSR
-const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), {
-  ssr: false,
-});
+import ConfirmDialog from './ConfirmDialog';
 
 interface Message {
   id: string;
@@ -26,30 +21,28 @@ const initialMessage = {
 export default function Chat() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [inputValue, setInputValue] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize component after mount
+  // Initialize mounted state
   useEffect(() => {
     setMounted(true);
-    setMessages([initialMessage]);
   }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Scroll effect
   useEffect(() => {
-    if (mounted && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (mounted) {
+      scrollToBottom();
     }
-  }, [messages, mounted]);
-
-  // Prevent rendering until mounted
-  if (!mounted) {
-    return null;
-  }
+  }, [messages]);
 
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
@@ -115,6 +108,10 @@ export default function Chat() {
   const handleExitConfirm = () => {
     router.push('/');
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
