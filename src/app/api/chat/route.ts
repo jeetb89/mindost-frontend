@@ -1,58 +1,83 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { NinniPersona } from '@/utils/ninniPersona';
+import { ResponseCache } from '@/utils/responseCache';
+import { RateLimit } from '@/utils/rateLimit';
+import { headers } from 'next/headers';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const THERAPY_SYSTEM_PROMPT = `You are MindDost, an advanced AI therapist with expertise in:
-- Cognitive Behavioral Therapy (CBT)
-- Mindfulness techniques
-- Emotional support and validation
-- Multi-cultural counseling
-- Crisis intervention
-
-Your approach:
-1. Listen actively and validate emotions
-2. Identify cognitive patterns and emotional triggers
-3. Offer practical CBT techniques and mindfulness exercises
-4. Provide culturally sensitive support
-5. Maintain professional boundaries while being warm and empathetic
-6. Give clear, actionable suggestions when appropriate
-7. Recognize crisis situations and provide appropriate resources
-
-Remember:
-- Always maintain confidentiality
-- Be non-judgmental and empathetic
-- Adapt your language style to match the user
-- Focus on emotional support and practical solutions
-- Use appropriate therapeutic techniques based on the situation
-
-Safety:
-- If you detect serious crisis or self-harm risks, provide emergency resources
-- Clarify that you're an AI and recommend professional help when needed
-- Never give medical advice or diagnoses`;
-
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json();
-
-    // Add system message if not present
-    if (!messages.some(msg => msg.role === 'system')) {
-      messages.unshift({ role: 'system', content: THERAPY_SYSTEM_PROMPT });
+    const { messages, userIp, isFirstMessage = false } = await request.json();
+    
+    // Check rate limit
+    if (!await RateLimit.check(userIp)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      );
     }
 
+    // Get the user's message (last message in the array)
+    const userMessage = messages[messages.length - 1].content;
+    
+    // Format messages with Ninni's persona
+    const { messages: formattedMessages, detectedLanguage } = 
+      await NinniPersona.formatUserMessage(userMessage, isFirstMessage);
+
+    // Try to get cached response (skip cache for first message to ensure dynamic greeting)
+    if (!isFirstMessage) {
+      const cacheKey = JSON.stringify(formattedMessages);
+      const cachedResponse = ResponseCache.get(cacheKey);
+      if (cachedResponse) {
+        return NextResponse.json({
+          content: cachedResponse,
+          detectedLanguage
+        });
+      }
+    }
+
+    // Get chat completion
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
-      messages,
+      model: "gpt-3.5-turbo",
+      messages: formattedMessages,
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 150,
+      presence_penalty: 0.6,
+      frequency_penalty: 0.3,
     });
 
     const response = completion.choices[0].message;
 
-    return NextResponse.json(response);
+    // Cache the response (skip caching first message)
+    if (!isFirstMessage) {
+      const cacheKey = JSON.stringify(formattedMessages);
+      ResponseCache.set(cacheKey, response.content || '');
+    }
+
+    // Get the host from headers
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+
+    // Get emotion analysis with absolute URL
+    const emotionResponse = await fetch(`${protocol}://${host}/api/analyze-emotion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: userMessage })
+    });
+    
+    const { emotion } = await emotionResponse.json();
+
+    return NextResponse.json({
+      content: response.content,
+      detectedLanguage,
+      detectedEmotion: emotion
+    });
   } catch (error) {
     console.error('Error in chat API:', error);
     return NextResponse.json(

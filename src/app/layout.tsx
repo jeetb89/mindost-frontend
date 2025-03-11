@@ -6,8 +6,8 @@ import Header from "@/components/Header";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MindDost - Your AI Therapy Companion",
-  description: "An AI-powered therapy companion for mental health support",
+  title: "MindDost - Your AI Mental Health Companion",
+  description: "A compassionate AI companion for mental health support in English and Hinglish",
 };
 
 export default function RootLayout({
@@ -18,12 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
-        </div>
+        <Header />
+        <main className="pt-16">
+          {children}
+        </main>
       </body>
     </html>
   );
