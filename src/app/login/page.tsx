@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import ClientOnly from '@/components/ClientOnly';
 import { TypeAnimation } from 'react-type-animation';
+import { POST } from '../api/login/route';
 
 
 function LoginContent() {
@@ -14,6 +15,9 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -22,6 +26,24 @@ function LoginContent() {
     }
   }, [user, router]);
 
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const response = await POST(email, password);
+      // const data = await response.json();
+      // if (data.error) {
+      //   setError(data.error);
+      //   return;
+      // }
+      // setToken(data.token);
+      // router.push('/');
+      console.log(response);
+    } catch (error) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleDemoAccess = () => {
     router.push('/');
   };
@@ -93,6 +115,7 @@ function LoginContent() {
                         <button 
                           type="submit" 
                           className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+                          onClick={handleLogin}
                         >
                           Sign in
                         </button>
