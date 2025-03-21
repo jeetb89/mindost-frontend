@@ -205,6 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.get(`/api/auth/profile?${queryString}`);
       
       sessionStorage.setItem("id", res.data?._id);
+      localStorage.setItem("user", JSON.stringify(res.data));
     } catch (error) {
       console.error('Profile details error:', error);
       throw error;
