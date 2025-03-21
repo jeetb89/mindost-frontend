@@ -25,7 +25,7 @@ interface Session {
   };
 }
 
-const sessions = [
+export const sessions = [
   {
     id: 4,
     date: "Mar 15, 2025",

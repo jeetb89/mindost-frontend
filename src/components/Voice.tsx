@@ -34,6 +34,7 @@ declare global {
 
 export default function Voice() {
   const { user } = useAuth();
+  console.log(user)
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');

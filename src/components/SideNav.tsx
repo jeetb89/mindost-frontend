@@ -1,9 +1,6 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Layout, Menu } from "antd";
 import {
-  DashboardOutlined,
-  UserOutlined,
-  SettingOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
 } from "@ant-design/icons";
