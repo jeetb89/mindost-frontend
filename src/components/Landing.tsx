@@ -16,6 +16,8 @@ import { createChatHistory } from "./util";
 import ChatInput from "./ChatInput";
 import { Typography } from "antd";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const HomeIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +256,7 @@ export default function Landing() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/sessions/start",
+        `${API_URL}/api/sessions/start`,
         { userId: user._id },
         {
           headers: {
@@ -317,7 +319,7 @@ export default function Landing() {
 
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/sessions/chat",
+          `${API_URL}/api/sessions/chat`,
           {
             sessionId: localStorage.getItem("currentSessionId"),
             message: transcript,
@@ -359,7 +361,7 @@ export default function Landing() {
     setCloseChat(true);
     try {
       await axios.post(
-        `http://localhost:5000/api/sessions/${localStorage.getItem(
+        `${API_URL}/api/sessions/${localStorage.getItem(
           "currentSessionId"
         )}/end`,
         {}, // Empty body since the backend doesn't expect a request body
