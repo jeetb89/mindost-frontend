@@ -186,7 +186,7 @@ export default function Landing() {
     // Remove the data URL prefix if present
     console.log(base64Audio);
     const base64Data = base64Audio.replace(/^data:audio\/\w+;base64,/, "");
-
+console.log(isPlaying)
     // Convert base64 to blob
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -230,7 +230,6 @@ export default function Landing() {
   const [isTyping, setIsTyping] = useState(false);
   const [openListener, setOpenListener] = useState(false);
   const currMessageRef = useRef<{ sender: string; text: string } | null>(null);
-
   interface Message {
     sender: string;
     text: string;
@@ -241,7 +240,7 @@ export default function Landing() {
     sender: string = "bot"
   ): void => {
     currMessageRef.current = { sender, text: newMessage };
-    // setIsTyping(true);
+    setIsTyping(isTyping);
 
     setMessages((prev: Message[]) => [...prev, { sender, text: newMessage }]);
   };

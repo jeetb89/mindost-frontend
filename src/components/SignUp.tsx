@@ -180,7 +180,7 @@ export default function Signup() {
   );
 }
 
-const SideText = () => {
+export const SideText = () => {
   return (
     <TypeAnimation
       sequence={[
