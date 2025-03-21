@@ -42,7 +42,7 @@ export default function SessionHistory() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+const API_URL = import.meta.env.VITE_API_URL; 
   const HomeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
       <path d="M12.03125 1.5a1 1 0 00-.539062.138672l-9.5 5.587891a1 1 0 101.007812 1.726562V20a1 1 0 001 1h16a1 1 0 001-1V8.953125a1 1 0 101.007812-1.726562l-9.5-5.587891A1 1 0 0012.03125 1.5zM12 3.660156l7 4.117188V19h-3v-7a1 1 0 00-1-1H9a1 1 0 00-1 1v7H5V7.777344l7-4.117188zM10 13h4v6h-4v-6z" />
@@ -111,7 +111,7 @@ export default function SessionHistory() {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const response = await axios.post(
-        'http://localhost:5000/api/sessions/history',
+        `${API_URL}/api/sessions/history`,
         { userId: user._id },
         {
           headers: {

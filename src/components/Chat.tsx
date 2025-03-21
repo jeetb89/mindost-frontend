@@ -1,199 +1,137 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
-import { MicrophoneIcon, XMarkIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
-import { getChatResponse } from '@/services/openai';
-import { useRouter } from 'next/navigation';
-import ClientOnly from './ClientOnly';
-import dynamic from 'next/dynamic';
-
-// Dynamically import ConfirmDialog with no SSR
-const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), {
-  ssr: false,
-});
-
+import { useAuth } from '../context/AuthContext';
+const API_URL = import.meta.env.VITE_API_URL;
 interface Message {
   id: string;
-  text: string;
-  isUser: boolean;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
 }
 
-const initialMessage = {
-  id: 'initial',
-  text: "hey there! it's good to have you here. how are you feeling today? or better yet—what's been on your mind lately? no rush, we can ease into this however you'd like.",
-  isUser: false,
-};
-
 export default function Chat() {
-  const router = useRouter();
-  const [messages, setMessages] = useState<Message[]>([initialMessage]);
-  const [inputValue, setInputValue] = useState('');
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (inputValue.trim() && !isLoading) {
-      const userMessage = inputValue.trim();
-      setInputValue('');
-      setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || isLoading) return;
 
-      // Add user message to chat
-      const newUserMessage = {
-        id: `user-${Date.now()}`,
-        text: userMessage,
-        isUser: true,
-      };
-      setMessages(prev => [...prev, newUserMessage]);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: inputMessage,
+      sender: 'user',
+      timestamp: new Date(),
+    };
 
-      try {
-        // Convert messages to the format expected by OpenAI
-        const chatHistory = messages.map(msg => ({
-          role: msg.isUser ? 'user' : 'assistant',
-          content: msg.text
-        }));
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
 
-        // Get AI response
-        const aiResponse = await getChatResponse([
-          ...chatHistory,
-          { role: 'user', content: userMessage }
-        ]);
+    try {
+      const response = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ message: inputMessage }),
+      });
 
-        // Add AI response to chat
-        setMessages(prev => [...prev, {
-          id: `ai-${Date.now()}`,
-          text: aiResponse || "I apologize, but I am unable to respond at the moment.",
-          isUser: false,
-        }]);
-      } catch (error) {
-        console.error('Error:', error);
-        setMessages(prev => [...prev, {
-          id: `error-${Date.now()}`,
-          text: "I apologize, but I encountered an error. Please try again.",
-          isUser: false,
-        }]);
-      } finally {
-        setIsLoading(false);
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
       }
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: data.response,
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'Sorry, I encountered an error. Please try again.',
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleVoiceClick = () => {
-    router.push('/voice');
-  };
-
-  const handleExit = () => {
-    setIsExitDialogOpen(true);
-  };
-
-  const handleExitConfirm = () => {
-    router.push('/');
   };
 
   return (
-    <ClientOnly>
-      <div className="flex flex-col h-[calc(100vh-4rem)]">
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
+    <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${
+              message.sender === 'user' ? 'justify-end' : 'justify-start'
+            }`}
+          >
             <div
-              key={message.id}
-              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+              className={`max-w-[70%] rounded-lg p-3 ${
+                message.sender === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-900'
+              }`}
             >
-              {!message.isUser && (
-                <div className="w-8 h-8 rounded-full bg-yellow-400 mr-3 flex-shrink-0" />
-              )}
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  message.isUser
-                    ? 'bg-yellow-400 text-gray-900'
-                    : 'bg-gray-100 text-gray-900'
-                }`}
-              >
-                {message.text}
-              </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="w-8 h-8 rounded-full bg-yellow-400 mr-3 flex-shrink-0" />
-              <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area */}
-        <div className="border-t border-gray-200 p-4">
-          <div className="max-w-4xl mx-auto">
-            {/* Control buttons row */}
-            <div className="flex justify-between mb-2">
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleVoiceClick}
-                  className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                >
-                  <MicrophoneIcon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleExit}
-                  className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Input field */}
-            <div className="relative">
-              <textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="type your message..."
-                className="w-full pr-12 py-3 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none text-gray-900 placeholder-gray-500"
-                rows={1}
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={isLoading || !inputValue.trim()}
-                className="absolute right-2 bottom-2 p-2 rounded-full bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-colors disabled:opacity-50"
-              >
-                <ArrowUpIcon className="w-5 h-5" />
-              </button>
+              <p className="text-sm">{message.content}</p>
+              <span className="text-xs opacity-70 mt-1 block">
+                {message.timestamp.toLocaleTimeString()}
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* Exit Confirmation Dialog */}
-        <ConfirmDialog
-          isOpen={isExitDialogOpen}
-          onClose={() => setIsExitDialogOpen(false)}
-          onConfirm={handleExitConfirm}
-          title="want to end the session?"
-          message="no worries you can continue anytime"
-        />
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white rounded-lg p-3">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
-    </ClientOnly>
+
+      <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !inputMessage.trim()}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
   );
 } 

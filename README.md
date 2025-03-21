@@ -1,126 +1,54 @@
-# MindDost - Your AI Mental Health Companion
+# React + TypeScript + Vite
 
-MindDost (meaning "Mind Friend" in Hindi) is an innovative AI-powered mental health companion that provides a safe, empathetic space for users to express their thoughts and feelings. Featuring Ninni, a compassionate AI companion, MindDost offers support in both English and Hinglish (Hindi-English mix), making emotional support more accessible and culturally relevant for Indian users.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 🌟 Features
+Currently, two official plugins are available:
 
-### Multilingual Support
-- Seamless conversation in English and Hinglish
-- Automatic language detection and response matching
-- Culturally sensitive communication
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-### Intelligent Conversation
-- Dynamic time-based greetings
-- Emotion detection and analysis
-- Empathetic and contextual responses
-- Active listening and emotional reflection
+## Expanding the ESLint configuration
 
-### User Experience
-- Safe and non-judgmental space
-- Natural, flowing conversations
-- No rush, user-paced interactions
-- 24/7 availability
-- High-quality audio processing with AudioWorklet
-- Real-time voice analysis
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### Technical Features
-- Smart response caching for quick interactions
-- Rate limiting for sustainable usage
-- Emotion analysis for better understanding
-- Dynamic conversation adaptation
-- Analytics and user behavior tracking
-- Secure data storage and management
-
-## 🛠️ Tech Stack
-
-### Frontend
-- Next.js 14
-- React
-- TypeScript
-- Tailwind CSS
-- AudioWorklet API for advanced audio processing
-
-### Backend
-- Next.js API Routes
-- OpenAI GPT-3.5 Turbo
-- Node.js
-- Supabase for data storage and real-time features
-
-### AI/ML
-- OpenAI API for conversation
-- Custom emotion analysis
-- Language detection system
-- Real-time voice emotion analysis
-
-### Analytics & Monitoring
-- PostHog for user analytics and behavior tracking
-- Custom event tracking
-- User journey analysis
-- Performance monitoring
-
-### Performance & Security
-- Response caching system
-- Rate limiting
-- Error handling
-- Secure API integration
-- Real-time data synchronization
-- End-to-end encryption
-
-## 🔒 Privacy & Security
-
-MindDost takes your privacy seriously:
-- No conversation data is stored permanently
-- All interactions are ephemeral
-- No personal information is required
-- Secure API handling
-- Encrypted data storage
-- Privacy-first analytics
-
-## 🌈 About Ninni
-
-Ninni is your AI companion in MindDost, designed to be:
-- Compassionate and understanding
-- Professional yet warm
-- Culturally aware
-- Available 24/7
-- Non-judgmental and supportive
-- Voice-enabled for natural interaction
-
-## 🔑 Environment Variables
-
-Required environment variables:
-```env
-OPENAI_API_KEY=your_openai_api_key
-NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
-NEXT_PUBLIC_POSTHOG_HOST=your_posthog_host
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```js
+export default tseslint.config({
+  extends: [
+    // Remove ...tseslint.configs.recommended and replace with this
+    ...tseslint.configs.recommendedTypeChecked,
+    // Alternatively, use this for stricter rules
+    ...tseslint.configs.strictTypeChecked,
+    // Optionally, add this for stylistic rules
+    ...tseslint.configs.stylisticTypeChecked,
+  ],
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
 ```
 
-## ⚖️ Usage Guidelines
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-MindDost is designed for emotional support and companionship. It is NOT:
-- A replacement for professional mental health care
-- A crisis intervention service
-- A diagnostic tool
-- A medical advice platform
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-If you're experiencing a mental health emergency, please contact professional mental health services or emergency services in your area.
-
-## 📝 License
-
-MIT License - feel free to use and modify as needed.
-
-## 🙏 Acknowledgments
-
-Special thanks to:
-- OpenAI for providing the AI capabilities
-- The mental health professional community for insights
-- Our users for their trust and feedback
-- PostHog for analytics infrastructure
-- Supabase for data management
-- Web Audio API community for audio processing capabilities
-
----
-
-*MindDost: Because everyone deserves a friend who listens.* 
+export default tseslint.config({
+  plugins: {
+    // Add the react-x and react-dom plugins
+    'react-x': reactX,
+    'react-dom': reactDom,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended typescript rules
+    ...reactX.configs['recommended-typescript'].rules,
+    ...reactDom.configs.recommended.rules,
+  },
+})
+```

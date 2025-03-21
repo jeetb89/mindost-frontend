@@ -40,7 +40,7 @@ export default function Voice() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
-
+const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -71,7 +71,7 @@ export default function Voice() {
 
   const handleVoiceInput = async (text: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/session/chat', {
+      const response = await fetch(`${API_URL}/api/session/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
