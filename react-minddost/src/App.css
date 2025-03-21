@@ -40,3 +40,15 @@
 .read-the-docs {
   color: #888;
 }
+
+.custom-chat-input {
+  border: 2px solid black !important;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.custom-chat-input:focus,
+.custom-chat-input:hover {
+  border-color: black !important;
+  box-shadow: none !important;
+}

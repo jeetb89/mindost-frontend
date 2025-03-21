@@ -15,7 +15,7 @@ export default function Signup() {
   const [showOtpInput, setShowOtpInput] = useState(false);
 
   useEffect(() => {
-    if (user) navigate('/');
+    if (user) navigate('/landing');
   }, [user, navigate]);
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -24,6 +24,7 @@ export default function Signup() {
     setError('');
     try {
       await signup(name, email, password);
+      
       setShowOtpInput(true);
     } catch (error: any) {
       setError(error.message);
@@ -41,7 +42,7 @@ export default function Signup() {
       const isVerified = await verifyOtp(email, otp);
       if (isVerified) {
         await completeSignup(name, email, password);
-        navigate('/');
+        // navigate('/landing');
       }
     } catch (error: any) {
       setError(error.message);
@@ -53,7 +54,7 @@ export default function Signup() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">calmi</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">MinDost</h1>
       <h2 className="text-2xl font-semibold text-gray-800">ready when you are</h2>
       <p className="text-gray-500 mb-6">your safe space, one convo at a time</p>
       
