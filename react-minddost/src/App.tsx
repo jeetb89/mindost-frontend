@@ -9,16 +9,19 @@ import Voice from './components/Voice';
 import Landing from './components/Landing';
 import SessionHistory from './components/Session';
 import Settings from './components/Settings';
+// import SideNavBar from './components/SideNav';
+
 function App() {
   return (
     <Router>
       <AuthProvider>
         <div className="min-h-screen bg-white">
           <Header />
+          {/* <SideNavBar/> */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/Landing" element={<Landing />} />
+            <Route path="/landing" element={<Landing />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/voice" element={<Voice />} />

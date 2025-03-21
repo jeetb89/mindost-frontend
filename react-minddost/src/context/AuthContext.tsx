@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '../lib/axios';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
-  _id: string;
   accessToken: string;
   name: string;
   email: string;
@@ -19,6 +19,7 @@ interface AuthContextType {
   sendOtp: (email: string) => Promise<boolean>;
   verifyOtp: (email: string, otp: string) => Promise<boolean>;
   completeSignup: (name: string, email: string, password: string) => Promise<void>;
+  profileDetails: (params: Record<string, string>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -31,11 +32,13 @@ const AuthContext = createContext<AuthContextType>({
   sendOtp: async () => false,
   verifyOtp: async () => false,
   completeSignup: async () => {},
+  profileDetails: async () => {}
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', data.token);
+      sessionStorage.setItem('id',data?.user?._id)
     } catch (error: any) {
       console.error('Login error:', error);
       if (error.response?.status === 404) {
@@ -125,28 +129,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeSignup = async (username: string, email: string, password: string) => {
     try {
-      const { data } = await api.post('/api/auth/signup', {
+      const res = await api.post('/api/auth/signup', {
         username,
         email,
         password,
         userIdType: 'user'
       });
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (res.data?.error) {
+        throw new Error(res.data.error);
       }
 
+      let stringifiedData =JSON.parse(res?.config?.data);
+
       const userData = {
-        _id: data.user._id,
-        accessToken: data.token,
-        name: data.user.name,
-        email: data.user.email,
+        // _id: res?.data?.user._id,
+        accessToken: res?.data?.token,
+        name: stringifiedData?.username,
+        email: stringifiedData?.email,
         userIdType: 'user',
       };
 
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', userData?. accessToken);
     } catch (error: any) {
       console.error('Complete signup error:', error);
       if (error.response?.status === 404) {
@@ -165,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const userData = {
-        _id: data.user._id,
+        // _id: data.user._id,
         accessToken: data.token,
         name: data.user.name,
         email: data.user.email,
@@ -193,6 +199,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const profileDetails = async (params: Record<string, string>) => {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const res = await api.get(`/api/auth/profile?${queryString}`);
+      
+      sessionStorage.setItem("id", res.data?._id);
+    } catch (error) {
+      console.error('Profile details error:', error);
+      throw error;
+    }
+  };
+
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -203,7 +222,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup, 
       sendOtp, 
       verifyOtp,
-      completeSignup 
+      completeSignup,
+      profileDetails, 
     }}>
       {children}
     </AuthContext.Provider>
