@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { TypeAnimation } from 'react-type-animation';
 
 export default function Signup() {
-  const { user, signup, verifyOtp, completeSignup } = useAuth();
+  const { user, signup, verifyOtp, completeSignup, profileDetails } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -42,7 +42,8 @@ export default function Signup() {
       const isVerified = await verifyOtp(email, otp);
       if (isVerified) {
         await completeSignup(name, email, password);
-        // navigate('/landing');
+        await profileDetails({ email });
+        navigate('/landing');
       }
     } catch (error: any) {
       setError(error.message);
