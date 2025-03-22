@@ -5,12 +5,7 @@ import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outlin
 import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
 
-const navigation = [
-  { name: 'Home', href: '/', current: true },
-  { name: 'Chat', href: '/chat', current: false },
-  { name: 'Voice', href: '/voice', current: false },
-  { name: 'About', href: '/about', current: false },
-];
+
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -33,13 +28,13 @@ export default function Header() {
     <Disclosure as="nav" className="bg-white shadow">
       {({ open }) => (
         <>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 box-shadow-md">
             <div className="flex h-16 justify-between">
               <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
+                <div className="flex flex-shrink-0">
                   <Logo />
                 </div>
-                <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                {/* <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
@@ -54,7 +49,7 @@ export default function Header() {
                       {item.name}
                     </Link>
                   ))}
-                </div>
+                </div> */}
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:items-center">
                 {user ? (
@@ -122,7 +117,7 @@ export default function Header() {
           </div>
 
           <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 pb-3 pt-2">
+            {/* <div className="space-y-1 pb-3 pt-2">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -137,7 +132,7 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-            </div>
+            </div> */}
             {!user && (
               <div className="border-t border-gray-200 pb-3 pt-4">
                 <div className="space-y-1">

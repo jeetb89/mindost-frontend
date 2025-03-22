@@ -10,6 +10,7 @@ import Landing from './components/Landing';
 import SessionHistory from './components/Session';
 import Settings from './components/Settings';
 // import SideNavBar from './components/SideNav';
+// import SessionDetails from './components/SessionDetails';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/voice" element={<Voice />} />
             <Route path="/session" element={<SessionHistory />} />
             <Route path="/settings" element={<Settings />} />
+            {/* <Route path="/session/:id" element={<SessionDetails />} /> */}
           </Routes>
         </div>
       </AuthProvider>

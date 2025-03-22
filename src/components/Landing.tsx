@@ -15,6 +15,8 @@ import TypingEffect from "./ui/TypingEffect";
 import { createChatHistory } from "./util";
 import ChatInput from "./ChatInput";
 import { Typography } from "antd";
+import logoImage from "../assets/minDost.png";
+// Import your image
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -401,9 +403,7 @@ console.log(isPlaying)
       {/* Sidebar */}
       <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
-          <h1 className="text-xl font-switzer font-semibold mb-6 text-gray-900 text-center">
-            MindDost
-          </h1>
+        
           <nav className="space-y-1">
             <NavItem
               label="home"
@@ -489,6 +489,11 @@ console.log(isPlaying)
           </Switch>
         </div>
         <div className="flex flex-col items-center">
+          <img 
+            src={logoImage}
+            alt="MindDost Logo" 
+            className="w-32 h-32 mb-4 object-contain"
+          />
           <p className="mb-6 text-lg bg-white text-gray-900 font-switzer font-semibold">
             burning the midnight oil!
           </p>
