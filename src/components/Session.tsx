@@ -25,23 +25,13 @@ interface Session {
   };
 }
 
-export const sessions = [
-  {
-    id: 4,
-    date: "Mar 15, 2025",
-    summary:
-      "In this session, you seemed to be in a neutral state, indicating that things were fine today. We touched on the idea of summarizing a chart, though it was unclear what chart you were referring to. This suggests an opportunity to clarify your goals and tool...",
-  },
-  { id: 3, date: "Mar 15, 2025" },
-  { id: 2, date: "Mar 14, 2025" },
-  { id: 1, date: "Mar 8, 2025" },
-];
-
 export default function SessionHistory() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null); // For storing the selected session for the popup
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 const API_URL = import.meta.env.VITE_API_URL; 
   const HomeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
@@ -126,6 +116,16 @@ const API_URL = import.meta.env.VITE_API_URL;
       setError('Failed to load session history');
       setLoading(false);
     }
+  };
+
+  const handleViewDetails = (session: Session) => {
+    setSelectedSession(session);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedSession(null);
   };
 
   useEffect(() => {
@@ -213,11 +213,13 @@ const API_URL = import.meta.env.VITE_API_URL;
         </div>
       </aside>
 
+      
+
       {/* Main Content */}
       <div className="flex-1 p-8 ml-10">
         <h2 className="text-3xl font-bold text-gray-800">Past Sessions</h2>
         <p className="text-gray-500">Your previous sessions</p>
-        
+
         {loading ? (
           <div className="flex justify-center items-center h-[60vh]">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -225,24 +227,21 @@ const API_URL = import.meta.env.VITE_API_URL;
         ) : error ? (
           <div className="text-red-500 text-center mt-4">{error}</div>
         ) : (
-          <ScrollArea className="mt-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <ScrollArea className="mt-6 space-y-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
             {sessions.map((session) => (
               <Card key={session._id} className="p-5 bg-white shadow rounded-lg border border-gray-200 mb-4">
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-semibold text-lg text-gray-900">
-                    Session {session._id.slice(-4)}
-                  </h3>
+                  <h3 className="font-semibold text-lg text-gray-900">Session {session._id.slice(-4)}</h3>
                   <span className="text-xs text-gray-500">
                     {new Date(session.startTime).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
-                      minute: '2-digit'
+                      minute: '2-digit',
                     })}
                   </span>
                 </div>
-                
                 {session.messages.length > 0 && (
                   <div className="mt-2 text-sm text-gray-600">
                     <p className="font-medium mb-1">Last message:</p>
@@ -253,8 +252,8 @@ const API_URL = import.meta.env.VITE_API_URL;
                 )}
 
                 {session.summary && (session.summary.mainTopics.length > 0 || 
-                                   session.summary.keyInsights.length > 0 || 
-                                   session.summary.recommendedActions.length > 0) && (
+                                     session.summary.keyInsights.length > 0 || 
+                                     session.summary.recommendedActions.length > 0) && (
                   <div className="mt-3 text-sm">
                     {session.summary.mainTopics.length > 0 && (
                       <p className="text-gray-600">Topics: {session.summary.mainTopics.join(', ')}</p>
@@ -266,8 +265,8 @@ const API_URL = import.meta.env.VITE_API_URL;
                 )}
 
                 <div className="mt-3 flex justify-end">
-                  <button 
-                    onClick={() => navigate(`/session/${session._id}`)}
+                  <button
+                    onClick={() => handleViewDetails(session)}
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
                     View Details →
@@ -277,9 +276,47 @@ const API_URL = import.meta.env.VITE_API_URL;
             ))}
           </ScrollArea>
         )}
-        
-        {/* Upgrade Section */}
-        <div className="mt-6 p-5 bg-yellow-100 text-center rounded-lg border border-yellow-300">
+
+        {/* Modal for Viewing Session Details */}
+        {isModalOpen && selectedSession && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-3">Session Details</h3>
+              <p className="font-medium">Date: {new Date(selectedSession.startTime).toLocaleDateString()}</p>
+
+              <div className="mt-4">
+                <h4 className="font-semibold">Summary:</h4>
+                <div className="mt-2">
+                  {selectedSession.summary.mainTopics.length > 0 ||
+                  selectedSession.summary.keyInsights.length > 0 ||
+                  selectedSession.summary.recommendedActions.length > 0 ? (
+                    <div>
+                      {selectedSession.summary.mainTopics.length > 0 && (
+                        <p className="text-gray-600">Topics: {selectedSession.summary.mainTopics.join(', ')}</p>
+                      )}
+                      {selectedSession.summary.keyInsights.length > 0 && (
+                        <p className="text-gray-600 mt-1">Insights: {selectedSession.summary.keyInsights.join(', ')}</p>
+                      )}
+                      {selectedSession.summary.recommendedActions.length > 0 && (
+                        <p className="text-gray-600 mt-1">Recommended Actions: {selectedSession.summary.recommendedActions.join(', ')}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No summary available</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button onClick={closeModal} className="bg-blue-500 text-white">
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+                {/* Upgrade Section */}
+                <div className="mt-6 p-5 bg-yellow-100 flex justify-center items-center text-center rounded-lg border border-yellow-300">
           <p className="text-gray-700">Monthly limit reached. Upgrade for more.</p>
           <Button className="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg">
             Upgrade
@@ -287,5 +324,5 @@ const API_URL = import.meta.env.VITE_API_URL;
         </div>
       </div>
     </div>
-  );
+  )
 }
