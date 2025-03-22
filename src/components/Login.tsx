@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import mindDostLogo from '../assets/minDost.png';
 
 export default function Login() {
   const { user, signInWithGoogle, login } = useAuth();
@@ -31,7 +32,9 @@ export default function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">calmi</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">
+        <img src={mindDostLogo} alt="mindDost" className="w-40 h-40" />
+      </h1>
       <h2 className="text-2xl font-semibold text black text-gray-800">ready when you are</h2>
       <p className="text-gray-500 mb-6">your safe space, one convo at a time</p>
       

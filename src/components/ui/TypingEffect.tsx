@@ -18,7 +18,7 @@ const TypingEffect: React.FC<TypingEffectProps> = ({
     setDisplayedText(""); // Reset text before typing new content
 
     const interval = setInterval(() => {
-      if (index < messageRef.current!.length) {
+      if (index < messageRef.current!.length-1) {
         setDisplayedText((prev) => prev + messageRef.current![index]);
         index++;
       } else {
