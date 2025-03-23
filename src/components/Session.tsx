@@ -22,6 +22,7 @@ interface Session {
     mainTopics: string[];
     keyInsights: string[];
     recommendedActions: string[];
+    moodAnalysis:string
   };
 }
 
@@ -255,13 +256,15 @@ const API_URL = import.meta.env.VITE_API_URL;
                                      session.summary.keyInsights.length > 0 || 
                                      session.summary.recommendedActions.length > 0) && (
                   <div className="mt-3 text-sm">
-                    {session.summary.mainTopics.length > 0 && (
+                    {session?.summary.mainTopics.length > 0 && (
                       <p className="text-gray-600">Topics: {session.summary.mainTopics.join(', ')}</p>
                     )}
                     {session.summary.keyInsights.length > 0 && (
                       <p className="text-gray-600 mt-1">Insights: {session.summary.keyInsights.join(', ')}</p>
                     )}
-                  </div>
+                   {session?.summary.moodAnalysis.length > 0 && (
+                      <p className="text-gray-600 ">Topics: {session.summary.moodAnalysis}</p>
+                    )}                  </div>
                 )}
 
                 <div className="mt-3 flex justify-end">
@@ -280,15 +283,18 @@ const API_URL = import.meta.env.VITE_API_URL;
         {isModalOpen && selectedSession && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-              <h3 className="text-lg font-semibold mb-3">Session Details</h3>
-              <p className="font-medium">Date: {new Date(selectedSession.startTime).toLocaleDateString()}</p>
+              <h3 className="text-lg font-semibold mb-3 text-gray-600">Session Details</h3>
+              <p className="font-medium text-gray-600">Date: {new Date(selectedSession.startTime).toLocaleDateString()}</p>
 
               <div className="mt-4">
-                <h4 className="font-semibold">Summary:</h4>
-                <div className="mt-2">
+                <h4 className="font-semibold text-gray-600">Summary:</h4>
+                <div className="mt-2 text-gray-600">
                   {selectedSession.summary.mainTopics.length > 0 ||
                   selectedSession.summary.keyInsights.length > 0 ||
-                  selectedSession.summary.recommendedActions.length > 0 ? (
+                  selectedSession.summary.recommendedActions.length > 0 ||
+                  selectedSession.summary.moodAnalysis.length>0 ?
+                   (
+                    
                     <div>
                       {selectedSession.summary.mainTopics.length > 0 && (
                         <p className="text-gray-600">Topics: {selectedSession.summary.mainTopics.join(', ')}</p>
@@ -298,6 +304,9 @@ const API_URL = import.meta.env.VITE_API_URL;
                       )}
                       {selectedSession.summary.recommendedActions.length > 0 && (
                         <p className="text-gray-600 mt-1">Recommended Actions: {selectedSession.summary.recommendedActions.join(', ')}</p>
+                      )}
+                         {selectedSession.summary.moodAnalysis.length > 0 && (
+                        <p className="text-gray-600 mt-1">MoodAnalysis: {selectedSession.summary.moodAnalysis}</p>
                       )}
                     </div>
                   ) : (
