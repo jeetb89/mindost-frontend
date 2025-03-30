@@ -92,7 +92,6 @@ const BookingSteps = () => {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [isStepCompleted, setIsStepCompleted] = useState(false);
 
-
   const findPrice = (session: any) => {
     const option = sessionOptions.find((options) => options.value === session);
     return option?.price || null;
@@ -132,6 +131,27 @@ const BookingSteps = () => {
 
       return updatedInfo;
     });
+  };
+
+  const handlePayNow = () => {
+    const eventTitle = "Therapist Session"; // Change as needed
+    const startDate = "20250401T100000Z"; // Format: YYYYMMDDTHHmmssZ
+    const endDate = "20250401T110000Z";
+    const details = "Therapy session scheduled upon payment";
+    const location = "Online - Zoom/Google Meet";
+    const attendees = [personalInfo?.email, "bishtaryan80@gmail.com"]; // Replace with dynamic emails
+
+    // Generate Google Calendar URL
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      eventTitle
+    )}&dates=${startDate}/${endDate}&details=${encodeURIComponent(
+      details
+    )}&location=${encodeURIComponent(location)}&add=${attendees
+      .map(encodeURIComponent)
+      .join(",")}`;
+
+    // Open Google Calendar link in a new tab
+    window.open(calendarUrl, "_blank");
   };
 
   const next = () => {
@@ -600,7 +620,9 @@ const BookingSteps = () => {
             </Col>
             <Col>
               <Tooltip
-                title={!isConsentGiven ? " Please accept consent form" : undefined}
+                title={
+                  !isConsentGiven ? " Please accept consent form" : undefined
+                }
               >
                 <Button
                   style={{
@@ -609,6 +631,7 @@ const BookingSteps = () => {
                     width: "100%",
                   }}
                   disabled={!isConsentGiven} // Button enabled only when checked
+                  onClick={handlePayNow}
                 >
                   Pay now
                 </Button>

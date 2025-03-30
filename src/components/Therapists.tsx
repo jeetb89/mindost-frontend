@@ -10,8 +10,9 @@ import {
   SettingsIcon,
   TherapistIcon,
 } from "./util";
+import axios from "axios";
 import { Fab } from "@mui/material";
-import { Row } from "antd";
+import { Row, Skeleton } from "antd";
 import TherapistsCard from "./ui/TherapistsCard"; // Ensure this path is correct and the component exists
 import axios from "axios";
 
@@ -21,18 +22,26 @@ import axios from "axios";
 //   _id: string;
 //   timestamp: string;
 // }
-
-interface Therapists {
-  _id: string;
-  userId: string;
-  status: string;
-  //   messages: Message[];
-  startTime: string;
-  summary: {
-    mainTopics: string[];
-    keyInsights: string[];
-    recommendedActions: string[];
-    moodAnalysis: string;
+interface Therapist {
+  id: number;
+  name: string;
+  specialization: string;
+  image: string;
+  description: string;
+  pricing: {
+    originalPrice: number;
+    discountedPrice: number;
+    currency: string;
+  };
+  rating: {
+    score: number;
+    totalStars: number;
+  };
+  expertise: string[];
+  languages: string[];
+  actions: {
+    bookNowUrl: string;
+    viewProfileUrl: string;
   };
 }
 
@@ -62,18 +71,41 @@ function NavItem({
 
 export const Therapists: React.FunctionComponent = () => {
   const navigate = useNavigate();
-  const [doctors, setDoctors] = useState([]);
-  const getDoctors = async () => {
-    const response = await axios.get(`https://3d2b-27-7-128-170.ngrok-free.app/api/doctors/list`);
-    setDoctors(response.data);
-  };
+
+  const [therapistsList, setTherapistsList] = useState<Therapist[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    getDoctors();
-  }, []);
+    const fetchDoctors = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No auth token found!");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API_URL}/api/doctors/list`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          setTherapistsList(response.data);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error);
+      }
+    };
+
+    fetchDoctors();
+  }, [API_URL]); // Add API_URL as a dependency if it's dynamic
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
+      {/* <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
           <h1 className="text-xl font-switzer font-semibold mb-6 text-gray-900 text-center">
             MindDost
@@ -141,10 +173,10 @@ export const Therapists: React.FunctionComponent = () => {
             </button>
           </div>
         </div>
-      </aside>
+      </aside> */}
 
       {/* Main Content */}
-      <div className="flex-1 p-8 ml-10">
+      <div className="flex-1 p-8 ml-10" style={{ overflowX: "auto" }}>
         <Row>
           <Fab
             variant="extended"
@@ -156,14 +188,14 @@ export const Therapists: React.FunctionComponent = () => {
               "&:hover": {
                 backgroundColor: "#ffc800",
               },
-              fontWeight: '600',
-               fontSize:'small',
+              fontWeight: "600",
+              fontSize: "small",
             }}
           >
-            Meet Our Therapist
+            Meet Our Therapists
           </Fab>
 
-          <Fab
+          {/* <Fab
             variant="extended"
             size="medium"
             sx={{
@@ -173,12 +205,12 @@ export const Therapists: React.FunctionComponent = () => {
                 backgroundColor: "#ffc800", // Change hover color
               },
               marginRight: "2%",
-              fontWeight: '600',
-              fontSize:'small',
+              fontWeight: "600",
+              fontSize: "small",
             }}
           >
             Your Booking
-          </Fab>
+          </Fab> */}
         </Row>
         <Row
           style={{
@@ -190,27 +222,42 @@ export const Therapists: React.FunctionComponent = () => {
         >
           Book a Therapist
         </Row>
-        <Row  
-        style={{
+        <Row
+          style={{
             color: "grey",
             fontSize: "medium",
             fontWeight: "500",
             marginTop: "2%",
-          }}>
-             We take a holistic,trauma-informed approach that addresses both mind and boy, helping you get to the root of your challenges. Using techniques like CBT, DBT,
-             ACT, Gestalt. Transactional Analysis , and Somatic  practices , we personalize each session to fit your unique needs. </Row>
-        <Row style={{ margin: "4% 0%" }}>
-          <TherapistsCard
-            therapist={{
-              id: 1,
-              name: "Anjali",
-              specialization: "Gyno",
-              image: "",
-              description: "Famous gyno",
-            }}
-          />
+          }}
+        >
+          We take a holistic,trauma-informed approach that addresses both mind
+          and boy, helping you get to the root of your challenges. Using
+          techniques like CBT, DBT, ACT, Gestalt. Transactional Analysis , and
+          Somatic practices , we personalize each session to fit your unique
+          needs.{" "}
         </Row>
-        {/* </div> */}
+        <Row
+          style={{
+            margin: "4% 0%",
+            display: "flex",
+            justifyContent: "space-between",
+            rowGap: "40px",
+          }}
+        >
+          {loading ? (
+            <Skeleton />
+          ) : therapistsList && therapistsList.length > 0 ? (
+            therapistsList.map((therapist) => (
+              <TherapistsCard key={therapist.id} therapist={therapist} />
+            ))
+          ) : (
+            <Row
+              style={{ textAlign: "center", width: "100%", marginTop: "20px" }}
+            >
+              No Therapists available...
+            </Row>
+          )}
+        </Row>
       </div>
     </div>
   );

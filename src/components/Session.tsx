@@ -149,7 +149,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
+      {/* Sidebar
       <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
           <nav className="space-y-1">
@@ -211,7 +211,7 @@ const API_URL = import.meta.env.VITE_API_URL;
             </button>
           </div>
         </div>
-      </aside>
+      </aside> */}
 
       
 

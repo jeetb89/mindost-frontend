@@ -102,7 +102,7 @@ const user = JSON.parse(userDetails || '{}');
   return (
     <div className="flex min-h-screen bg-gray-100 flex flex-row w-full">
       {/* Sidebar */}
-      <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
+      {/* <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
           <nav className="space-y-1">
             <NavItem 
@@ -163,7 +163,7 @@ const user = JSON.parse(userDetails || '{}');
             </button>
           </div>
         </div>
-      </aside>
+      </aside> */}
       
       {/* Main Content */}
       <main className="flex-1 p-10 bg-white shadow-md w-full text-gray-900 font-satosh ml-10">
