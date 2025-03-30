@@ -9,6 +9,8 @@ import Voice from './components/Voice';
 import Landing from './components/Landing';
 import SessionHistory from './components/Session';
 import Settings from './components/Settings';
+import { Therapists } from './components/Therapists';
+import TherapistsProfile from './components/ui/TherapistsProfile';
 // import SideNavBar from './components/SideNav';
 // import SessionDetails from './components/SessionDetails';
 
@@ -26,9 +28,10 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/voice" element={<Voice />} />
+            <Route path="/therapists" element={<Therapists/>}/>
             <Route path="/session" element={<SessionHistory />} />
             <Route path="/settings" element={<Settings />} />
-            {/* <Route path="/session/:id" element={<SessionDetails />} /> */}
+            <Route path="/therapist-profile" element ={<TherapistsProfile/>}/>
           </Routes>
         </div>
       </AuthProvider>

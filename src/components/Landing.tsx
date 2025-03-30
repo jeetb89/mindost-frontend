@@ -16,6 +16,8 @@ import { createChatHistory } from "./util";
 import ChatInput from "./ChatInput";
 import { Typography } from "antd";
 import logoImage from "../assets/minDost.png";
+import pako from "pako";
+
 // Import your image
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -29,6 +31,7 @@ const HomeIcon = () => (
     <path d="M12.03125 1.5a1 1 0 00-.539062.138672l-9.5 5.587891a1 1 0 101.007812 1.726562V20a1 1 0 001 1h16a1 1 0 001-1V8.953125a1 1 0 101.007812-1.726562l-9.5-5.587891A1 1 0 0012.03125 1.5zM12 3.660156l7 4.117188V19h-3v-7a1 1 0 00-1-1H9a1 1 0 00-1 1v7H5V7.777344l7-4.117188zM10 13h4v6h-4v-6z" />
   </svg>
 );
+
 const ProfileIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -38,6 +41,7 @@ const ProfileIcon = () => (
     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
   </svg>
 );
+
 const SessionHistoryIcon = () => (
   <svg
     className="w-5 h-5"
@@ -60,6 +64,7 @@ const SessionHistoryIcon = () => (
     />
   </svg>
 );
+
 const FeedbackIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -106,6 +111,7 @@ l28.891-11.353l11.863,9.379v120.748c0,5.522,4.478,10,10,10s10-4.478,10-10V138.91
     />
   </svg>
 );
+
 const SettingsIcon = () => (
   <svg
     className="w-5 h-5"
@@ -171,6 +177,7 @@ const LoaderIcon = () => {
   );
 };
 
+
 export default function Landing() {
   const { profileDetails } = useAuth();
   const navigate = useNavigate();
@@ -184,32 +191,33 @@ export default function Landing() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [closeChat, setCloseChat] = useState(false);
   const [showVoiceLoader, setShowVoiceLoader] = useState(false);
-  const playAudioFromBase64 = (base64Audio: string) => {
-    // Remove the data URL prefix if present
-    console.log(base64Audio);
-    const base64Data = base64Audio.replace(/^data:audio\/\w+;base64,/, "");
-console.log(isPlaying)
-    // Convert base64 to blob
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "audio/mp3" });
 
-    // Create URL from blob
-    const audioUrl = URL.createObjectURL(blob);
+  //   const playAudioFromBase64 = (base64Audio: string) => {
+  //     // Remove the data URL prefix if present
+  //     console.log(base64Audio);
+  //     const base64Data = base64Audio.replace(/^data:audio\/\w+;base64,/, "");
+  // console.log(isPlaying)
+  //     // Convert base64 to blob
+  //     const byteCharacters = atob(base64Data);
+  //     const byteNumbers = new Array(byteCharacters.length);
+  //     for (let i = 0; i < byteCharacters.length; i++) {
+  //       byteNumbers[i] = byteCharacters.charCodeAt(i);
+  //     }
+  //     const byteArray = new Uint8Array(byteNumbers);
+  //     const blob = new Blob([byteArray], { type: "audio/mp3" });
 
-    // Play audio
-    if (audioRef.current) {
-      audioRef.current.src = audioUrl;
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((error) => console.error("Error playing audio:", error));
-    }
-  };
+  //     // Create URL from blob
+  //     const audioUrl = URL.createObjectURL(blob);
+
+  //     // Play audio
+  //     if (audioRef.current) {
+  //       audioRef.current.src = audioUrl;
+  //       audioRef.current
+  //         .play()
+  //         .then(() => setIsPlaying(true))
+  //         .catch((error) => console.error("Error playing audio:", error));
+  //     }
+  //   };
 
   useEffect(() => {
     const fetchProfileDetails = async () => {
@@ -272,9 +280,9 @@ console.log(isPlaying)
         localStorage.setItem("currentSessionId", sessionId);
         setSessionStarted(true);
 
-        if (audioData) {
-          playAudioFromBase64(audioData);
-        }
+        // if (audioData) {
+        //   playAudioFromBase64(audioData);
+        // }
 
         if (message) {
           addMessageWithTyping(message, "bot");
@@ -297,6 +305,7 @@ console.log(isPlaying)
       }
     }
   };
+
   const handleVoiceInput = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -307,17 +316,13 @@ console.log(isPlaying)
     }
 
     setOpenListener(true);
-
     const recognition = new SpeechRecognition();
     recognition.interimResults = false;
 
     recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
-
       setMessages((prev) => [...prev, { sender: "user", text: transcript }]);
-
       setShowVoiceLoader(true);
-
       try {
         const response = await axios.post(
           `${API_URL}/api/sessions/chat`,
@@ -329,20 +334,32 @@ console.log(isPlaying)
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
+            responseType: "arraybuffer", // Handle binary response (if gzipped)
           }
         );
 
-        if (response.data.audioData) {
-          playAudioFromBase64(response.data.audioData);
+        let decompressedData;
+
+        if (response.headers["content-encoding"] === "gzip") {
+          decompressedData = new TextDecoder("utf-8").decode(
+            pako.inflate(new Uint8Array(response.data))
+          );
+        } else {
+          decompressedData = new TextDecoder("utf-8").decode(response.data);
         }
 
-        if (response.data.message) {
-          addMessageWithTyping(response.data.message, "bot");
+        const parsedResponse = JSON.parse(decompressedData);
+
+        // if (parsedResponse.audioData) {
+        //   playAudioFromBase64(parsedResponse.audioData);
+        // }
+
+        if (parsedResponse.message) {
+          addMessageWithTyping(parsedResponse.message, "bot");
         }
       } catch (error) {
         console.error("Failed to send voice message:", error);
       } finally {
-        // Hide loader once API call is done
         setShowVoiceLoader(false);
       }
     };
@@ -392,6 +409,35 @@ console.log(isPlaying)
     }
   };
 
+  const handleInputMessage = async (message: string) => {
+    setMessages((prev) => [...prev, { sender: "user", text: message }]);
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/sessions/chat`,
+        {
+          sessionId: localStorage.getItem("currentSessionId"),
+          message,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // if (response.data.audioData) {
+      //   playAudioFromBase64(response.data.audioData);
+      // }
+
+      if (response.data.message) {
+        addMessageWithTyping(response.data.message, "bot");
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       {/* Add audio element */}
@@ -403,7 +449,6 @@ console.log(isPlaying)
       {/* Sidebar */}
       <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
-        
           <nav className="space-y-1">
             <NavItem
               label="home"
@@ -432,7 +477,7 @@ console.log(isPlaying)
             <NavItem
               label="therapist"
               className="font-satoshi bg-white text-gray-900 w-full hover:cursor-pointer hover:border-gray-400"
-              onClick={() => navigate("/Landing")}
+              onClick={() => navigate("/therapists")}
               icon={<TherapistIcon />}
             />
           </nav>
@@ -489,9 +534,9 @@ console.log(isPlaying)
           </Switch>
         </div>
         <div className="flex flex-col items-center">
-          <img 
+          <img
             src={logoImage}
-            alt="MindDost Logo" 
+            alt="MindDost Logo"
             className="w-32 h-32 mb-4 object-contain"
           />
           <p className="mb-6 text-lg bg-white text-gray-900 font-switzer font-semibold">
@@ -643,7 +688,7 @@ console.log(isPlaying)
                 // createChatHistory(messages)
               )}
 
-              <ChatInput />
+              <ChatInput handleInputMessage={handleInputMessage} />
             </div>
           </div>
         )}
@@ -684,156 +729,3 @@ function NavItem({
     </button>
   );
 }
-
-// const handleVoiceInput = () => {
-//   // Create a new SpeechRecognition instance
-//   const SpeechRecognition =
-//     window.SpeechRecognition || window.webkitSpeechRecognition;
-//   const recognition = new SpeechRecognition();
-
-//   recognition.onresult = async (event) => {
-//     const transcript = event.results[0][0].transcript;
-//     try {
-//       const response = await axios.post(
-//         "http://localhost:5000/api/sessions/chat",
-//         {
-//           sessionId: localStorage.getItem("currentSessionId"),
-//           message: transcript,
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         }
-//       );
-
-//       if (response.data.audioData) {
-//         playAudioFromBase64(response.data.audioData);
-//         setMessage(`hello ${response.data.message}`);
-//       }
-//     } catch (error) {
-//       console.error("Failed to send voice message:", error);
-//     }
-//   };
-
-//   recognition.start();
-// };
-
-// const handleSessionStart = async () => {
-//   try {
-//     // Get user and token from localStorage
-//     const user = JSON.parse(localStorage.getItem("user") || "{}");
-//     const token = localStorage.getItem("token");
-
-//     if (!user?._id || !token) {
-//       console.error("User not authenticated or token missing.");
-//       return;
-//     }
-
-//     // Make API call
-//     const response = await axios.post(
-//       "http://localhost:5000/api/sessions/start",
-//       { userId: user._id, sessionMode, genZMode },
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-
-//     const { sessionId, audioData, message } = response.data;
-//     if (sessionId) {
-//       localStorage.setItem("currentSessionId", sessionId);
-//       setSessionStarted(true);
-
-//       if (audioData) {
-//         playAudioFromBase64(audioData);
-//       }
-
-//       if (message) {
-//         setMessage(message);
-//       }
-//     } else {
-//       console.error("No session ID returned from the API.");
-//     }
-//   } catch (error) {
-//     if (axios.isAxiosError(error)) {
-//       console.error("Failed to start session:", error.response?.data || error.message);
-//     } else {
-//       console.error("Failed to start session:", error);
-//     }
-//   }
-// };
-
-// Add typing animation effect
-// useEffect(() => {
-//   if (message) {
-//     setIsTyping(true);
-//     setDisplayMessage("");
-//     let index = 0;
-
-//     const typeInterval = setInterval(() => {
-//       setDisplayMessage((prev) => prev + message[index]);
-//       index++;
-
-//       if (index >= message.length) {
-//         clearInterval(typeInterval);
-//         setIsTyping(false);
-//       }
-//     }, 100);
-
-//     return () => clearInterval(typeInterval);
-//   }
-// }, [message]);
-
-// const handleVoiceInput = () => {
-//   const SpeechRecognition =
-//     window.SpeechRecognition || window.webkitSpeechRecognition;
-
-//   if (!SpeechRecognition) {
-//     console.error("Speech Recognition is not supported in this browser.");
-//     return;
-//   }
-
-//   setOpenListener(true);
-
-//   const recognition = new SpeechRecognition();
-//   recognition.interimResults = false;
-
-//   recognition.onresult = async (event) => {
-//     const transcript = event.results[0][0].transcript;
-//     try {
-//       const response = await axios.post(
-//         "http://localhost:5000/api/sessions/chat",
-//         {
-//           sessionId: localStorage.getItem("currentSessionId"),
-//           message: transcript,
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         }
-//       );
-
-//       if (response.data.audioData) {
-//         playAudioFromBase64(response.data.audioData);
-//         setMessage(`hello ${response.data.message}`);
-//       }
-//     } catch (error) {
-//       console.error("Failed to send voice message:", error);
-//     }
-//   };
-
-//   recognition.onerror = (event) => {
-//     console.error("Speech recognition error:", event.error);
-//   };
-
-//   recognition.onend = () => {
-//     console.log("Voice recording stopped.");
-//     setTimeout(() => setOpenListener(false), 500); // Delay added for debugging
-//   };
-
-//   recognition.start();
-// };

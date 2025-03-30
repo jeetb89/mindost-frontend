@@ -181,7 +181,7 @@ const API_URL = import.meta.env.VITE_API_URL;
             <NavItem 
               label="therapist" 
               className="font-satoshi bg-white text-gray-900 w-full hover:cursor-pointer hover:border-gray-400" 
-              onClick={() => navigate('/Landing')} 
+              onClick={() => navigate('/therapists')} 
               icon={<TherapistIcon />}
             />
           </nav>
