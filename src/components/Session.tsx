@@ -152,7 +152,6 @@ const API_URL = import.meta.env.VITE_API_URL;
       {/* Sidebar
       <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
-          <h1 className="text-xl font-switzer font-semibold mb-6 text-gray-900 text-center">MindDost</h1>
           <nav className="space-y-1">
             <NavItem 
               label="home" 
@@ -289,10 +288,10 @@ const API_URL = import.meta.env.VITE_API_URL;
               <div className="mt-4">
                 <h4 className="font-semibold text-gray-600">Summary:</h4>
                 <div className="mt-2 text-gray-600">
-                  {selectedSession.summary.mainTopics.length > 0 ||
-                  selectedSession.summary.keyInsights.length > 0 ||
-                  selectedSession.summary.recommendedActions.length > 0 ||
-                  selectedSession.summary.moodAnalysis.length>0 ?
+                  {selectedSession?.summary?.mainTopics?.length > 0 ||
+                  selectedSession?.summary?.keyInsights?.length > 0 ||
+                  selectedSession?.summary?.recommendedActions?.length > 0 ||
+                  selectedSession?.summary?.moodAnalysis?.length>0 ?
                    (
                     
                     <div>

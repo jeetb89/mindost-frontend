@@ -507,7 +507,7 @@ export default function Landing() {
             <div className="h-2 bg-gray-300 w-full rounded overflow-hidden mt-2">
               <div className="h-full bg-black w-1/3"></div>
             </div>
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-switzer font-semibold py-2 mt-2 rounded">
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-switzer font-semibold py-2 mt-2 rounded" onClick={() => navigate("/payment")}>
               upgrade
             </button>
           </div>

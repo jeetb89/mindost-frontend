@@ -12,8 +12,15 @@ import Settings from "./components/Settings";
 import { Therapists } from "./components/Therapists";
 import TherapistsProfile from "./components/ui/TherapistsProfile";
 import Layout from "./components/Layout";
+
 // import SideNavBar from './components/SideNav';
 // import SessionDetails from './components/SessionDetails';
+import Payment from './components/Payment';
+import DoctorsSignUp from './components/ui/DoctorsSignUp';
+import DoctorProfile from './components/DoctorProfile';
+import DoctorProfileView from './components/DoctorProfileView';
+import DoctorDashboard from './components/DoctorDashboard';
+import DoctorBookings from './components/DoctorBookings';
 
 function App() {
   return (
@@ -27,7 +34,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<SignUp />} />
-
             {/* All Other Pages with Sidebar */}
             <Route element={<Layout />}>
               <Route path="/landing" element={<Landing />} />
@@ -40,7 +46,16 @@ function App() {
                 path="/therapist-profile/:id"
                 element={<TherapistsProfile />}
               />
+                <Route path="/therapists/:id" element={<TherapistsProfile />} />
             </Route>
+            {/* <Route path="/session-history" element={<SessionHistory />} /> */}
+            <Route path="/payment" element={<Payment />} />
+          
+            <Route path="/doctor-signup" element={<DoctorsSignUp />} />
+            <Route path="/doctor-profile" element={<DoctorProfile />} />
+            <Route path="/doctor-profile/:id" element={<DoctorProfileView />} />
+            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor-bookings" element={<DoctorBookings />} />
           </Routes>
         </div>
       </AuthProvider>

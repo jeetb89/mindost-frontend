@@ -104,7 +104,6 @@ const user = JSON.parse(userDetails || '{}');
       {/* Sidebar */}
       {/* <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
-          <h1 className="text-xl font-switzer font-semibold mb-6 text-gray-900 text-center">MindDost</h1>
           <nav className="space-y-1">
             <NavItem 
               label="home" 

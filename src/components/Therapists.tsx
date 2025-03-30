@@ -14,6 +14,7 @@ import axios from "axios";
 import { Fab } from "@mui/material";
 import { Row, Skeleton } from "antd";
 import TherapistsCard from "./ui/TherapistsCard"; // Ensure this path is correct and the component exists
+import axios from "axios";
 
 // interface Message {
 //   role: string;
@@ -70,6 +71,7 @@ function NavItem({
 
 export const Therapists: React.FunctionComponent = () => {
   const navigate = useNavigate();
+
   const [therapistsList, setTherapistsList] = useState<Therapist[]>([]);
   const [loading, setLoading] = useState(true);
 

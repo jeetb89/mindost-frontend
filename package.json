@@ -19,6 +19,7 @@
     "@mui/material": "^6.4.8",
     "@mui/x-date-pickers": "^7.28.2",
     "@radix-ui/react-scroll-area": "^1.2.3",
+    "@vapi-ai/server-sdk": "^0.5.1",
     "antd": "^5.24.4",
     "axios": "^1.8.3",
     "lucide-react": "^0.482.0",
