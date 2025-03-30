@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import { API_URL } from './util';
+import { useNavigate } from 'react-router-dom';
 
 interface PricingPlan {
   name: string;
@@ -10,45 +12,45 @@ interface PricingPlan {
   features: string[];
 }
 
-const pricingPlans: PricingPlan[] = [
-  {
-    name: 'free',
-    price: 0,
-    sessionDuration: 10,
-    sessionsLimit: 3,
-    features: [
-      '10 minutes session duration',
-      '3 free sessions',
-      'Basic chat support'
-    ]
-  },
-  {
-    name: 'basic',
-    price: 149,
-    sessionDuration: 10,
-    sessionsLimit: 1,
-    features: [
-      '10 minutes session duration',
-      'Priority chat support',
-      'Session recording',
-      'Post session summary'
-    ]
-  },
-  {
-    name: 'pro',
-    price: 349,
-    sessionDuration: 20,
-    sessionsLimit: 1,
-    features: [
-      '20 minutes session duration',
-      'Priority chat support',
-      'Session recording',
-      'Post session summary',
-      'Personalized action plan',
-      'Follow-up support'
-    ]
-  }
-];
+// const pricingPlans: PricingPlan[] = [
+//   {
+//     name: 'free',
+//     price: 0,
+//     sessionDuration: 10,
+//     sessionsLimit: 3,
+//     features: [
+//       '10 minutes session duration',
+//       '3 free sessions',
+//       'Basic chat support'
+//     ]
+//   },
+//   {
+//     name: 'basic',
+//     price: 149,
+//     sessionDuration: 10,
+//     sessionsLimit: 1,
+//     features: [
+//       '10 minutes session duration',
+//       'Priority chat support',
+//       'Session recording',
+//       'Post session summary'
+//     ]
+//   },
+//   {
+//     name: 'pro',
+//     price: 349,
+//     sessionDuration: 20,
+//     sessionsLimit: 1,
+//     features: [
+//       '20 minutes session duration',
+//       'Priority chat support',
+//       'Session recording',
+//       'Post session summary',
+//       'Personalized action plan',
+//       'Follow-up support'
+//     ]
+//   }
+// ];
 
 declare global {
   interface Window {
@@ -57,70 +59,96 @@ declare global {
 }
 
 export default function Payment() {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
+  const [pricingPlans, setPlans] = useState<any[]>([]);
+  const getPlans = async () => {
+    const response = await axios.get(`${API_URL}/api/plans/list`,{
+        headers: {
+           "Content-Type": 'application/json',
+        }
 
+    });
+    console.log(response.data);
+    setPlans(response.data);
+  }
+  useEffect(() => {
+    getPlans();
+  }, []);
   const initializeRazorpay = (orderId: string, amount: number, planName: string) => {
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Your Razorpay Key ID
-      amount: amount * 100, // Amount in paise
-      currency: "INR",
-      name: "MindDost",
-      description: `${planName} Plan Subscription`,
-      order_id: orderId,
-      handler: async (response: any) => {
-        try {
-          // Verify payment on your backend
-          const verifyResponse = await axios.post(`${API_URL}/api/payments/verify`, {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          });
-
-          if (verifyResponse.data.success) {
-            // Update user's subscription status
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            await axios.post(`${API_URL}/api/users/update-subscription`, {
-              userId: user._id,
-              plan: planName
-            }, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-              }
+    try {
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount * 100, // Amount in paise
+        currency: "INR",
+        name: "MindDost",
+        description: `${planName} Plan Subscription`,
+        order_id: orderId,
+        handler: async (response: any) => {
+          try {
+            // Verify payment on your backend
+            const verifyResponse = await axios.post(`${API_URL}/api/plans/verify-payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
             });
 
-            alert('Payment successful! Your subscription has been activated.');
-            window.location.reload();
-          }
-        } catch (error) {
-          console.error('Payment verification failed:', error);
-          alert('Payment verification failed. Please contact support.');
-        }
-      },
-      prefill: {
-        name: "User Name",
-        email: "user@example.com",
-        contact: "9999999999"
-      },
-      notes: {
-        plan: planName
-      },
-      theme: {
-        color: "#4F46E5"
-      }
-    };
+            if (verifyResponse.data.success) {
+              // Update user's subscription status
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              await axios.post(`${API_URL}/api/plans/update-subscription`, {
+                userId: user._id,
+                plan: planName,
+                email: user.email
+              }, {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+              });
 
-    const razorpay = new window.Razorpay(options);
-    razorpay.open();
+              alert('Payment successful! Your subscription has been activated.');
+              navigate('/Landing');
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: "User Name",
+          email: "user@example.com",
+          contact: "9999999999"
+        },
+        notes: {
+          plan: planName
+        },
+        theme: {
+          color: "#4F46E5"
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Checkout form closed');
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Error initializing Razorpay:', error);
+      alert('Failed to initialize payment. Please try again.');
+    }
   };
 
-  const handleSubscribe = async (planName: string, price: number) => {
+  const handleSubscribe = async (plan: any) => {
     try {
       setLoading(true);
-      setSelectedPlan(planName);
+      setSelectedPlan(plan.name);
 
-      if (planName === 'free') {
+      if (plan.name === 'free') {
         // Handle free plan subscription
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         await axios.post(`${API_URL}/api/users/update-subscription`, {
@@ -137,17 +165,25 @@ export default function Payment() {
       }
 
       // Create order on your backend
-      const response = await axios.post(`${API_URL}/api/payments/create-order`, {
-        amount: price,
+      const response = await axios.post(`${API_URL}/api/plans/create-order`, {
+        id: plan._id,
+        amount: plan.price,
         currency: "INR"
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          "Content-Type": 'application/json',
+        }
       });
 
-      if (response.data.orderId) {
-        initializeRazorpay(response.data.orderId, price, planName);
+      if (response.data && response.data.razorpayOrderId) {
+        initializeRazorpay(response.data.razorpayOrderId, plan.price, plan.name);
+      } else {
+        throw new Error('Invalid order response from server');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
-      alert('Failed to create order. Please try again.');
+      alert(error.response?.data?.message || 'Failed to create order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -191,7 +227,7 @@ export default function Payment() {
                   </span>
                 </p>
                 <button
-                  onClick={() => handleSubscribe(plan.name, plan.price)}
+                  onClick={() => handleSubscribe(plan)}
                   disabled={loading}
                   className={`mt-8 block w-full py-2 px-4 border border-transparent rounded-md text-center font-medium ${
                     plan.name === 'free'
@@ -207,7 +243,7 @@ export default function Payment() {
                   What's included
                 </h4>
                 <ul className="mt-6 space-y-4">
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature: string) => (
                     <li key={feature} className="flex space-x-3">
                       <CheckIcon
                         className="flex-shrink-0 h-5 w-5 text-green-500"

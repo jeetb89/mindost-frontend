@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { TypeAnimation } from 'react-type-animation';
-import mindDostLogo from '../assets/minDost.png';
+import mindDostLogo from '../../assets/minDost.png';
 
-export default function Signup() {
+export default function  DoctorsSignUp() {
   const { user, signup, verifyOtp, completeSignup, profileDetails, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -24,7 +24,7 @@ export default function Signup() {
     setIsLoading(true);
     setError('');
     try {
-      await signup(name, email, password,'user');
+      await signup(name, email, password,'doctor');
       
       setShowOtpInput(true);
     } catch (error: any) {
@@ -42,9 +42,9 @@ export default function Signup() {
     try {
       const isVerified = await verifyOtp(email, otp);
       if (isVerified) {
-        await completeSignup(name, email, password,'user');
+        await completeSignup(name, email, password,'doctor');
         await profileDetails({ email });
-        navigate('/landing');
+        navigate('/doctor-profile');
       }
     } catch (error: any) {
       setError(error.message);
@@ -60,7 +60,7 @@ export default function Signup() {
         <img src={mindDostLogo} alt="mindDost" className="w-40 h-40" />
       </h1>
       <h2 className="text-2xl font-semibold text-gray-800">ready when you are</h2>
-      <p className="text-gray-500 mb-6">your safe space, one convo at a time</p>
+      <p className="text-gray-500 mb-6">Welcome to MindDost, Doctors</p>
       
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm">
         {!showOtpInput ? (

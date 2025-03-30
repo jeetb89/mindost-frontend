@@ -14,11 +14,11 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  login: (username: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string,userIdType:string) => Promise<void>;
+  signup: (name: string, email: string, password: string,userIdType:string) => Promise<boolean>;
   sendOtp: (email: string) => Promise<boolean>;
   verifyOtp: (email: string, otp: string) => Promise<boolean>;
-  completeSignup: (name: string, email: string, password: string) => Promise<void>;
+  completeSignup: (name: string, email: string, password: string,userIdType:string) => Promise<void>;
   profileDetails: (params: Record<string, string>) => Promise<void>;
 }
 
@@ -48,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string,userIdType:string) => {
     try {
       const { data } = await api.post('/api/auth/login', { 
         email: username, 
         password,
-        userIdType: 'user' 
+        userIdType: userIdType 
       });
       
       if (data.error) {
@@ -135,13 +135,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const completeSignup = async (username: string, email: string, password: string) => {
+  const completeSignup = async (username: string, email: string, password: string,userIdType:string) => {
     try {
       const res = await api.post('/api/auth/signup', {
         username,
         email,
         password,
-        userIdType: 'user'
+        userIdType: userIdType
       });
 
       if (res.data?.error) {

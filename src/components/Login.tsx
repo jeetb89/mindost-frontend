@@ -20,7 +20,7 @@ export default function Login() {
     setIsLoading(true);
     setError('');
     try {
-      await login(email, password);
+      await login(email, password,'user');
       // Check if user data is properly stored
       const storedUser = localStorage.getItem('user');
       if (!storedUser) {
@@ -106,7 +106,7 @@ export default function Login() {
           <div className="flex-grow border-t"></div>
         </div>
         <button
-          onClick={handleGoogleSignIn}
+          onClick={signInWithGoogle}
           className="w-full bg-white text-gray-900 border border-gray-500 py-1 rounded-md font-medium flex items-center justify-center hover:border-gray-300"
           disabled={isLoading}
         >
