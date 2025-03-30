@@ -1,29 +1,28 @@
-import { useState } from 'react';
+import { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
+import { Logo } from './Logo';
+
+
+
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const isDoctor = user.role === 'doctor';
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
-
-  const navigation = isDoctor ? [
-    { name: 'Dashboard', href: '/doctor-dashboard' },
-    { name: 'Bookings', href: '/doctor-bookings' },
-    { name: 'Profile', href: '/doctor-profile' },
-  ] : [
-    { name: 'Home', href: '/' },
-    { name: 'Therapists', href: '/therapists' },
-    { name: 'Session History', href: '/session-history' },
-    { name: 'Settings', href: '/settings' },
-  ];
 
   return (
     <Disclosure as="nav" className="bg-white shadow">
@@ -77,7 +76,7 @@ export default function Header() {
                               onClick={handleSignOut}
                               className={classNames(
                                 active ? 'bg-gray-100' : '',
-                                ' w-full px-4 py-2 text-left text-sm text-gray-700'
+                                'block w-full px-4 py-2 text-left text-sm text-gray-700'
                               )}
                             >
                               Sign out
@@ -116,45 +115,45 @@ export default function Header() {
               </div>
             </div>
           </div>
-          <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-              <div className="py-6">
-                {user._id ? (
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                  >
-                    Logout
-                  </button>
-                ) : (
+
+          <Disclosure.Panel className="sm:hidden">
+            {/* <div className="space-y-1 pb-3 pt-2">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={classNames(
+                    item.current
+                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700',
+                    'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
+                  )}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div> */}
+            {!user && (
+              <div className="border-t border-gray-200 pb-3 pt-4">
+                <div className="space-y-1">
                   <Link
                     to="/login"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                   >
-                    Login
+                    Sign in
                   </Link>
-                )}
+                  <Link
+                    to="/signup"
+                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                  >
+                    Sign up
+                  </Link>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+            )}
+          </Disclosure.Panel>
+        </>
+      )}
+    </Disclosure>
   );
 } 
