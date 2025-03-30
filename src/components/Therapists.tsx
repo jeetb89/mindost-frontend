@@ -14,7 +14,6 @@ import axios from "axios";
 import { Fab } from "@mui/material";
 import { Row, Skeleton } from "antd";
 import TherapistsCard from "./ui/TherapistsCard"; // Ensure this path is correct and the component exists
-import axios from "axios";
 
 // interface Message {
 //   role: string;
