@@ -51,28 +51,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       const { data } = await api.post('/api/auth/login', { 
-        email:username, 
+        email: username, 
         password,
         userIdType: 'user' 
       });
-      console.log(data);
       
       if (data.error) {
         throw new Error(data.error);
       }
 
+      // Create user data object
       const userData = {
         _id: data.user._id,
         accessToken: data.token,
-        name: data.user.name,
+        name: data.user.username,
         email: data.user.email,
-        userIdType: 'user',
+        userIdType: data.user.userType,
       };
 
+      // First set the user state
       setUser(userData);
+
+      // Then store in localStorage
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', data.token);
-      sessionStorage.setItem('id',data?.user?._id)
+      sessionStorage.setItem('id', data.user._id);
+
+      // Log the stored data to verify
+      console.log('Stored user data:', JSON.parse(localStorage.getItem('user') || 'null'));
+      console.log('Stored token:', localStorage.getItem('token'));
+      console.log('Stored id:', sessionStorage.getItem('id'));
     } catch (error: any) {
       console.error('Login error:', error);
       if (error.response?.status === 404) {
@@ -164,23 +172,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const { data } = await api.post('/api/auth/google');
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      const userData = {
-        // _id: data.user._id,
-        accessToken: data.token,
-        name: data.user.name,
-        email: data.user.email,
-        userIdType: 'user',
-      };
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
+      // Redirect to the backend's Google OAuth endpoint
+      window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
     } catch (error) {
       console.error('Google sign-in error:', error);
       throw error;

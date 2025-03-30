@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { TypeAnimation } from 'react-type-animation';
 import mindDostLogo from '../assets/minDost.png';
+
 export default function Signup() {
-  const { user, signup, verifyOtp, completeSignup, profileDetails } = useAuth();
+  const { user, signup, verifyOtp, completeSignup, profileDetails, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -149,7 +150,7 @@ export default function Signup() {
         </div>
 
         <button
-          onClick={() => navigate('/login')}
+          onClick={signInWithGoogle}
           className="w-full bg-white text-gray-900 border border-gray-500 py-1 rounded-md font-medium flex items-center justify-center hover:border-gray-300"
         >
           <svg className="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="800px" height="800px" viewBox="-0.5 0 48 48" version="1.1">
@@ -167,7 +168,7 @@ export default function Signup() {
               </g>
             </g>
           </svg>
-          Sign in with Google
+          Sign up with Google
         </button>
       </div>
 

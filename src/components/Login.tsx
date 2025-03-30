@@ -15,16 +15,33 @@ export default function Login() {
     if (user) navigate('/Landing');
   }, [user, navigate]);
 
-  const handleLogin = async (e:any) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
       await login(email, password);
+      // Check if user data is properly stored
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        throw new Error('Failed to store user data');
+      }
       navigate('/Landing');
-    } catch (error) {
-      setError('Invalid email or password');
+    } catch (error: any) {
+      setError(error.message || 'Invalid email or password');
       console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+    } catch (error: any) {
+      setError(error.message || 'Failed to sign in with Google');
+      console.error('Google sign-in error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +96,9 @@ export default function Login() {
           <a href="#" className="text-gray-600 text-center hover:text-gray-400">Forgot your password?</a>
         </div>
         <div className="text-sm text-center mt-2 hover:cursor-pointer">
-          <a onClick={() => navigate('/signup')} className="text-gray-600  text-center hover:text-gray-400">Dont have an account? Sign up</a>
+          <a onClick={() => navigate('/signup')} className="text-gray-600 text-center hover:text-gray-400">
+            Don't have an account? Sign up
+          </a>
         </div>
         <div className="flex items-center my-4">
           <div className="flex-grow border-t"></div>
@@ -87,8 +106,9 @@ export default function Login() {
           <div className="flex-grow border-t"></div>
         </div>
         <button
-          onClick={signInWithGoogle}
+          onClick={handleGoogleSignIn}
           className="w-full bg-white text-gray-900 border border-gray-500 py-1 rounded-md font-medium flex items-center justify-center hover:border-gray-300"
+          disabled={isLoading}
         >
           <svg className="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="800px" height="800px" viewBox="-0.5 0 48 48" version="1.1">
             <title>Google-color</title>
@@ -105,6 +125,7 @@ export default function Login() {
               </g>
             </g>
           </svg>
+          {isLoading ? 'Signing in...' : 'Sign in with Google'}
         </button>
       </div>
       <div className="fixed bottom-4 text-xs text-gray-600">
