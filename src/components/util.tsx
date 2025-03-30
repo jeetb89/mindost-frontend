@@ -57,6 +57,30 @@ export const createChatHistory = (messages: Message[]): JSX.Element[] => {
   ));
 };
 
+ export function NavItem({
+  label,
+  onClick,
+  className,
+  icon,
+}: {
+  label: string;
+  onClick?: () => void | Promise<void>;
+  className?: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center text-gray-700 hover:text-black space-x-2 p-2 ${
+        className || ""
+      }`}
+    >
+      {icon && <span className="w-5 h-5">{icon}</span>}
+      <span>{label}</span>
+    </button>
+  );
+}
+
 
 // export const createAiResponse = (messages: Message[]): JSX.Element[] => {
 //   return messages

@@ -447,7 +447,7 @@ export default function Landing() {
         style={{ display: "none" }}
       />
       {/* Sidebar */}
-      <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
+      {/* <aside className="w-1/10 min-w-[200px] bg-white border-r flex flex-col justify-between">
         <div>
           <nav className="space-y-1">
             <NavItem
@@ -512,7 +512,7 @@ export default function Landing() {
             </button>
           </div>
         </div>
-      </aside>
+      </aside> */}
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center">
