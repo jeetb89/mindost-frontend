@@ -519,23 +519,6 @@ export default function Landing() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center">
-        <div className="absolute top-6 right-6 flex items-center space-x-2">
-          <span className="text-sm font-satoshi">gen z mode</span>
-          <Switch
-            checked={genZMode}
-            onChange={setGenZMode}
-            className={`${
-              genZMode ? "bg-gray-800" : "bg-gray-300"
-            } relative inline-flex h-6 w-11 items-center rounded-full`}
-          >
-            <span className="sr-only">Toggle Gen Z Mode</span>
-            <span
-              className={`${
-                genZMode ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 transform bg-white rounded-full transition`}
-            />
-          </Switch>
-        </div>
         <div className="flex flex-col items-center">
           <img
             src={logoImage}
