@@ -61,8 +61,9 @@ export default function Chat() {
       };
 
       setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
+      window.alert(error?.response?.data?.message || 'An error occurred');
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: 'Sorry, I encountered an error. Please try again.',

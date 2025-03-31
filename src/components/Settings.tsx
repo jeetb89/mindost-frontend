@@ -191,7 +191,7 @@ const user = JSON.parse(userDetails || '{}');
         <div className="mb-6">
           <h3 className="text-lg font-semibold">Subscription Settings</h3>
           <h4 className="text-gray-600">manage subscription settings</h4>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-3">Upgrade</button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-3" onClick={() => navigate("/payment")}>Upgrade</button>
         </div>
         <hr className="border-t border-gray-300 mb-10 mt-10"/>
 

@@ -21,6 +21,7 @@ import DoctorProfile from './components/DoctorProfile';
 import DoctorProfileView from './components/DoctorProfileView';
 import DoctorDashboard from './components/DoctorDashboard';
 import DoctorBookings from './components/DoctorBookings';
+import UserBookings from './components/UserBookings';
 
 function App() {
   return (
@@ -42,11 +43,12 @@ function App() {
               <Route path="/therapists" element={<Therapists />} />
               <Route path="/session" element={<SessionHistory />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/bookings" element={<UserBookings />} />
               <Route
                 path="/therapist-profile/:id"
                 element={<TherapistsProfile />}
               />
-                <Route path="/therapists/:id" element={<TherapistsProfile />} />
+              <Route path="/therapists/:id" element={<TherapistsProfile />} />
             </Route>
             {/* <Route path="/session-history" element={<SessionHistory />} /> */}
             <Route path="/payment" element={<Payment />} />
@@ -56,6 +58,8 @@ function App() {
             <Route path="/doctor-profile/:id" element={<DoctorProfileView />} />
             <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
             <Route path="/doctor-bookings" element={<DoctorBookings />} />
+
+
           </Routes>
         </div>
       </AuthProvider>

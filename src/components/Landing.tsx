@@ -17,6 +17,7 @@ import ChatInput from "./ChatInput";
 import { Typography } from "antd";
 import logoImage from "../assets/minDost.png";
 import pako from "pako";
+import { AlignCenterOutlined } from "@ant-design/icons";
 
 // Import your image
 
@@ -274,7 +275,7 @@ export default function Landing() {
           },
         }
       );
-
+ 
       const { sessionId, audioData, message } = response.data;
       if (sessionId) {
         localStorage.setItem("currentSessionId", sessionId);
@@ -291,11 +292,13 @@ export default function Landing() {
         console.error("No session ID returned from the API.");
       }
     } catch (error) {
+      console.log(error)
       if (axios.isAxiosError(error)) {
         console.error(
           "Failed to start session:",
           error.response?.data || error.message
         );
+        alert( error.response?.data.message)
       } else {
         if (error instanceof Error) {
           console.error("Failed to start session:", error.message);

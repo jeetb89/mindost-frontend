@@ -189,6 +189,7 @@ export const Therapists: React.FunctionComponent = () => {
               },
               fontWeight: "600",
               fontSize: "small",
+              zIndex: 1000,
             }}
           >
             Meet Our Therapists

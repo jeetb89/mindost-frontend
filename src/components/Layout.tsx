@@ -1,9 +1,9 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { FeedbackIcon, HomeIcon, LogoutIcon, NavItem, ProfileIcon, SessionHistoryIcon, SettingsIcon, TherapistIcon } from "./util";
+import { BookingsIcon, FeedbackIcon, HomeIcon, LogoutIcon, NavItem, ProfileIcon, SessionHistoryIcon, SettingsIcon, TherapistIcon } from "./util";
+
 
 const Layout = () => {
  const navigate = useNavigate();
-
  const handleLogout = () => {
     try {
       localStorage.clear();
@@ -50,6 +50,12 @@ const Layout = () => {
               onClick={() => navigate("/therapists")}
               icon={<TherapistIcon />}
             />
+              <NavItem
+              label="bookings"
+              className="font-satoshi bg-white text-gray-900 w-full hover:cursor-pointer hover:border-gray-400"
+              onClick={() => navigate("/bookings")}
+              icon={<BookingsIcon />}
+            />
           </nav>
         </div>
         <div>
@@ -68,16 +74,16 @@ const Layout = () => {
           <div className="mt-4">
             <div className="text-sm flex justify-between font-satoshi">
               <span className="px-2 py-1 rounded border border-gray-400 text-gray-900 bg-white">
-                free
+                {JSON.parse(localStorage.getItem("user") || "{}")?.plan?.name}
               </span>
               <span className="px-2 py-1 rounded text-gray-900 bg-white">
-                1/3 sessions
+                {JSON.parse(localStorage.getItem("user") || "{}")?.session_count}/ {JSON.parse(localStorage.getItem("user") || "{}")?.plan?.sessionsRemaining} sessions
               </span>
             </div>
             <div className="h-2 bg-gray-300 w-full rounded overflow-hidden mt-2">
-              <div className="h-full bg-black w-1/3"></div>
+              <div className={`h-full bg-black w-${JSON.parse(localStorage.getItem("user") || "{}")?.session_count}/${JSON.parse(localStorage.getItem("user") || "{}")?.plan?.sessionsRemaining}`}></div>
             </div>
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-switzer font-semibold py-2 mt-2 rounded">
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-switzer font-semibold py-2 mt-2 rounded" onClick={() => navigate("/payment")}>
               upgrade
             </button>
           </div>

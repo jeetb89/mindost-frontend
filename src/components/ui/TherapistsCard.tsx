@@ -53,7 +53,7 @@ const TherapistsCard: React.FC<TherapistsCardProps> = ({ therapist }) => {
   const [isBookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   return (
-    <Card style={{ width: 700 }}>
+    <Card style={{ width: 500 }}>
       <>
         <span
           style={{
@@ -187,7 +187,7 @@ const TherapistsCard: React.FC<TherapistsCardProps> = ({ therapist }) => {
         width={1600}
         bodyStyle={{ height: 600, overflowY: "auto" }}
       >
-        <BookingSteps />
+        <BookingSteps therapist={therapist}  />
       </Modal>
     </Card>
   );

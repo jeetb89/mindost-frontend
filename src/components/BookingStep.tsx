@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Steps,
   Button,
@@ -18,6 +18,8 @@ import {
 import ChooseYourSlot from "./ui/ChooseSlot";
 import { VideoCameraOutlined, HourglassOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { API_URL } from "./util";
+import axios from "axios";
 
 const { Step } = Steps;
 const { Text } = Typography;
@@ -72,7 +74,7 @@ interface Slot {
   period: string;
 }
 
-const BookingSteps = () => {
+const BookingSteps = ({ therapist }: { therapist: any }) => {
   const [current, setCurrent] = useState(0);
   const [formData, setFormData] = useState({
     therapyBefore: null,
@@ -132,26 +134,110 @@ const BookingSteps = () => {
       return updatedInfo;
     });
   };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePayNow = () => {
-    const eventTitle = "Therapist Session"; // Change as needed
-    const startDate = "20250401T100000Z"; // Format: YYYYMMDDTHHmmssZ
-    const endDate = "20250401T110000Z";
-    const details = "Therapy session scheduled upon payment";
-    const location = "Online - Zoom/Google Meet";
-    const attendees = [personalInfo?.email, "bishtaryan80@gmail.com"]; // Replace with dynamic emails
+  useEffect(() => {
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
 
-    // Generate Google Calendar URL
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-      eventTitle
-    )}&dates=${startDate}/${endDate}&details=${encodeURIComponent(
-      details
-    )}&location=${encodeURIComponent(location)}&add=${attendees
-      .map(encodeURIComponent)
-      .join(",")}`;
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
-    // Open Google Calendar link in a new tab
-    window.open(calendarUrl, "_blank");
+  const handlePayNow = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please login to make a booking');
+        return;
+      }
+
+      // Create order
+      const orderResponse = await axios.post(
+        `${API_URL}/api/bookings/create-order`,
+        {
+          doctorId: therapist.id,
+          userId: JSON.parse(localStorage.getItem('user') || '{}')._id,
+          startDate: selectedSlot?.date,
+          startTime: selectedSlot?.time,
+          endTime: moment(selectedSlot?.time, "h:mm A").add(45, "minutes").format("h:mm A"),
+          sessionType: personalInfo.typeOfSession,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const orderData = orderResponse.data.data;
+console.log(orderData)
+      // Initialize Razorpay
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Mindost",
+        description: "Therapy Session Booking",
+        order_id: orderData.id,
+        handler: async (response: any) => {
+          try {
+            // Verify payment
+            const verifyResponse = await axios.post(
+              `${API_URL}/api/bookings/verify-payment`,
+              {
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+                bookingId: orderData.bookingId
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+
+            if (verifyResponse.data.success) {
+              alert('Payment successful! Your booking is confirmed.');
+              // You can add navigation or other success actions here
+            } else {
+              setError('Payment verification failed');
+            }
+          } catch (err: any) {
+            setError(err.response?.data?.message || 'Payment verification failed');
+          }
+        },
+        prefill: {
+          name: "User Name",
+          email: "user@example.com",
+          contact: "9999999999"
+        },
+        notes: {
+          address: "Mindost Office"
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create order');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const next = () => {

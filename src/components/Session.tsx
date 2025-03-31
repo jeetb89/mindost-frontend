@@ -323,12 +323,14 @@ const API_URL = import.meta.env.VITE_API_URL;
           </div>
         )}
                 {/* Upgrade Section */}
+                {JSON.parse(localStorage.getItem("user") || "{}")?.session_count >= JSON.parse(localStorage.getItem("user") || "{}")?.plan?.sessionsRemaining && (
                 <div className="mt-6 p-5 bg-yellow-100 flex justify-center items-center text-center rounded-lg border border-yellow-300">
           <p className="text-gray-700">Monthly limit reached. Upgrade for more.</p>
-          <Button className="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg">
+          <Button className="mt-3 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg" onClick={() => navigate("/payment")}>
             Upgrade
           </Button>
         </div>
+      )}
       </div>
     </div>
   )
