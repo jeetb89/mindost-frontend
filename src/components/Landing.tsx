@@ -226,7 +226,7 @@ export default function Landing() {
         const storedUser = localStorage.getItem("user");
         let userDetails = storedUser ? JSON.parse(storedUser) : null;
 
-        await profileDetails({ email: userDetails.email });
+        await profileDetails();
       } catch (error) {
         console.error("Failed to fetch profile details:", error);
       }

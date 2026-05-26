@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
+import api from '../lib/axios';
 
 interface SpeechRecognitionEvent extends Event {
   results: {
@@ -33,15 +33,20 @@ declare global {
 }
 
 export default function Voice() {
-  const { user } = useAuth();
-  console.log(user)
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
-const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    api.post('/api/sessions/new')
+      .then(({ data }) => setSessionId(data.sessionId))
+      .catch((err) => console.error('Failed to create session:', err));
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -71,27 +76,16 @@ const API_URL = import.meta.env.VITE_API_URL;
   }, []);
 
   const handleVoiceInput = async (text: string) => {
+    if (!sessionId) return;
     try {
-      const response = await fetch(`${API_URL}/api/session/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ message: text }),
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      setResponse(data.response);
-      speakResponse(data.response);
+      const { data } = await api.post('/api/sessions/chat', { message: text, sessionId });
+      setResponse(data.message);
+      speakResponse(data.message);
     } catch (error) {
-      console.error('Error:', error);
-      setResponse('Sorry, I encountered an error. Please try again.');
-      speakResponse('Sorry, I encountered an error. Please try again.');
+      console.error('Voice input error:', error);
+      const msg = 'Sorry, I encountered an error. Please try again.';
+      setResponse(msg);
+      speakResponse(msg);
     }
   };
 

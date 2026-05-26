@@ -43,7 +43,7 @@ export default function  DoctorsSignUp() {
       const isVerified = await verifyOtp(email, otp);
       if (isVerified) {
         await completeSignup(name, email, password,'doctor');
-        await profileDetails({ email });
+        await profileDetails();
         navigate('/doctor-profile');
       }
     } catch (error: any) {

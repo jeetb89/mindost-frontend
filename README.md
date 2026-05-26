@@ -1,54 +1,106 @@
-# React + TypeScript + Vite
+# MinDost — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + TypeScript client for the MinDost mental health platform.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + Vite |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| UI Components | Ant Design, MUI, Headless UI, Heroicons |
+| Routing | React Router DOM v7 |
+| HTTP Client | Axios (with JWT interceptor) |
+| Auth | JWT (stored in `localStorage`) + Google OAuth redirect |
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Node.js v20+
+
+### Setup
+
+```bash
+npm install
+cp .env.example .env
+# Set VITE_API_URL to your backend URL
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+App runs on `http://localhost:3000`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Environment Variables
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Create a `.env` file in this directory:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+## Project Structure
+
+```
+mindost-frontend/src/
+├── assets/                  # Images and static files
+├── components/
+│   ├── Chat.tsx             # Text chat with AI (MinDost)
+│   ├── Voice.tsx            # Browser-based voice chat
+│   ├── Landing.tsx          # Main dashboard after login
+│   ├── Login.tsx
+│   ├── SignUp.tsx           # User signup with OTP verification
+│   ├── Therapists.tsx       # Browse therapists
+│   ├── Session.tsx          # Session history
+│   ├── Settings.tsx
+│   ├── Payment.tsx          # Razorpay payment flow
+│   ├── DoctorDashboard.tsx
+│   ├── DoctorBookings.tsx
+│   ├── UserBookings.tsx
+│   ├── Header.tsx
+│   ├── Layout.tsx           # Sidebar layout wrapper
+│   └── ui/
+│       ├── DoctorsSignUp.tsx
+│       ├── TherapistsProfile.tsx
+│       └── ...
+├── context/
+│   └── AuthContext.tsx      # Global auth state (login, signup, OTP, profile)
+├── lib/
+│   └── axios.ts             # Axios instance with JWT + 401 interceptors
+├── styles/
+└── App.tsx                  # Routes + ProtectedRoute guard
+```
+
+## Auth Flow
+
+1. **Email/Password signup** — OTP sent via Brevo → verified → account created
+2. **Google OAuth** — redirects to `/api/auth/google`, returns JWT via query param to `/auth/callback`
+3. **JWT** — stored in `localStorage.token`, attached to every request by the Axios interceptor
+4. **Protected routes** — `ProtectedRoute` in `App.tsx` redirects unauthenticated users to `/login`
+
+## Key Pages
+
+| Route | Component | Auth Required |
+|---|---|---|
+| `/` | Home | No |
+| `/login` | Login | No |
+| `/signup` | SignUp | No |
+| `/doctor-signup` | DoctorsSignUp | No |
+| `/landing` | Landing | Yes |
+| `/chat` | Chat | Yes |
+| `/voice` | Voice | Yes |
+| `/therapists` | Therapists | Yes |
+| `/session` | SessionHistory | Yes |
+| `/bookings` | UserBookings | Yes |
+| `/payment` | Payment | Yes |
+| `/doctor-dashboard` | DoctorDashboard | Yes |
+| `/doctor-bookings` | DoctorBookings | Yes |
+
+## Scripts
+
+```bash
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run preview  # Preview production build
+npm run lint     # ESLint
 ```

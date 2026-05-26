@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-const API_URL = import.meta.env.VITE_API_URL;
+import { useState, useRef, useEffect, FormEvent } from 'react';
+import api from '../lib/axios';
+
 interface Message {
   id: string;
   content: string;
@@ -9,23 +9,25 @@ interface Message {
 }
 
 export default function Chat() {
-  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
- console.log(user)
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   useEffect(() => {
-    scrollToBottom();
+    api.post('/api/sessions/new')
+      .then(({ data }) => setSessionId(data.sessionId))
+      .catch((err) => console.error('Failed to create session:', err));
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || isLoading || !sessionId) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -39,38 +41,27 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ message: inputMessage }),
+      const { data } = await api.post('/api/sessions/chat', {
+        message: inputMessage,
+        sessionId,
       });
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: data.message,
         sender: 'ai',
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
-      console.error('Error:', error);
-      window.alert(error?.response?.data?.message || 'An error occurred');
-      const errorMessage: Message = {
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: error?.response?.data?.message || 'Sorry, I encountered an error. Please try again.',
         sender: 'ai',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, aiMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -82,15 +73,11 @@ export default function Chat() {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
               className={`max-w-[70%] rounded-lg p-3 ${
-                message.sender === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-900'
+                message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'
               }`}
             >
               <p className="text-sm">{message.content}</p>
@@ -120,13 +107,13 @@ export default function Chat() {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={sessionId ? 'Type your message...' : 'Starting session…'}
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
+            disabled={isLoading || !sessionId}
           />
           <button
             type="submit"
-            disabled={isLoading || !inputMessage.trim()}
+            disabled={isLoading || !inputMessage.trim() || !sessionId}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Send
@@ -135,4 +122,4 @@ export default function Chat() {
       </form>
     </div>
   );
-} 
+}

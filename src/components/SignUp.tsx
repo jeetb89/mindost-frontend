@@ -43,7 +43,7 @@ export default function Signup() {
       const isVerified = await verifyOtp(email, otp);
       if (isVerified) {
         await completeSignup(name, email, password,'user');
-        await profileDetails({ email });
+        await profileDetails();
         navigate('/landing');
       }
     } catch (error: any) {
